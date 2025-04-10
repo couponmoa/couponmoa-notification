@@ -19,8 +19,8 @@ public class EmailSenderService {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(dto.getEmailList().toArray(new String[0]));
-        message.setSubject("쿠폰 갱신 알림");
-        message.setText(dto.getCouponName() + " 쿠폰이 새로 발행되었습니다!");
+        message.setSubject(dto.getSubject());
+        message.setText(dto.getCouponName() + dto.getText());
 
         mailSender.send(message);
     }
