@@ -2,11 +2,13 @@ package com.couponmoa.backend.couponmoanotification.service;
 
 import com.couponmoa.backend.couponmoanotification.dto.MessageQueueDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EmailSenderService {
 
@@ -18,10 +20,11 @@ public class EmailSenderService {
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(dto.getEmailList().toArray(new String[0]));
+        message.setBcc(dto.getEmailList().toArray(new String[0]));
         message.setSubject(dto.getSubject());
         message.setText(dto.getCouponName() + dto.getText());
 
         mailSender.send(message);
+        log.info("메일 전송 완료");
     }
 }
