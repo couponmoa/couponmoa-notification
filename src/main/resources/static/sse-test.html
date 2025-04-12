@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>쿠폰 발급 알림 테스트</title>
+</head>
+<body>
+<h1>쿠폰 발급 알림 테스트</h1>
+<div id="alert-container">
+    <p>수신된 알림:</p>
+    <ul id="alerts"></ul>
+</div>
+
+<script>
+    const userId = 1; // 테스트할 유저 ID
+
+    // SseEmitter 방식
+    const eventSource = new EventSource(`api/v1/users/${userId}/notifications/emitter`);
+
+    // webflux 방식
+    // const eventSource = new EventSource(`api/v1/users/${userId}/notifications/webflux`);
+
+    eventSource.onmessage = function(event) {
+        const alertsUl = document.getElementById("alerts");
+        const newAlert = document.createElement("li");
+        newAlert.innerText = event.data;
+        alertsUl.appendChild(newAlert);
+    };
+
+    eventSource.onerror = function(error) {
+        console.error("SSE 오류 발생", error);
+        eventSource.close();
+    };
+</script>
+</body>
+</html>
