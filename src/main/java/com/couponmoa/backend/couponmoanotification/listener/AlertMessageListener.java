@@ -26,12 +26,12 @@ public class AlertMessageListener {
     // SseEmitter 기반. userId에 저장된 emitter 찾아서 알림 전송
     @SqsListener("coupon-alert-queue")
     public void receiveCouponMQ(@Payload CouponAlertDto alertDto) {
-        sseEmitterService.send(alertDto.getUserId(), alertDto.getMessage());
+        sseEmitterService.send(alertDto.getUserId(), alertDto.getMessage(), alertDto.getNotificationId());
     }
 
     // Webflux 기반. userId에 저장된 sink 찾아서 알림 전송(멀티캐스트)
 //    @SqsListener("coupon-alert-queue")
 //    public void receiveCouponMQ(@Payload CouponAlertDto alertDto) {
-//        webfluxService.send(alertDto.getUserId(), alertDto.getMessage());
+//        webfluxService.send(alertDto.getUserId(), alertDto.getMessage(), alertDto.getNotificationId());
 //    }
 }
