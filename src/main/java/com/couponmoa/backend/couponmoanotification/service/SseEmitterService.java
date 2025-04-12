@@ -1,21 +1,24 @@
-package com.couponmoa.backend.couponmoanotification.infra;
+package com.couponmoa.backend.couponmoanotification.service;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
-public class SseEmitterManager {
+@Service
+public class SseEmitterService {
+
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     // 클라이언트에서 연결 요청할 때 호출됨. sseEmitter 생성 및 저장
-    public void add(Long userId, SseEmitter emitter) {
+    public SseEmitter subscribe(Long userId) {
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L); // 30분 타임아웃
         this.emitters.put(userId, emitter);
         emitter.onCompletion(() -> emitters.remove(userId));
         emitter.onTimeout(() -> emitters.remove(userId));
+        return emitter;
     }
 
     // userId에 저장된 emitter 찾아서 알림 전송
