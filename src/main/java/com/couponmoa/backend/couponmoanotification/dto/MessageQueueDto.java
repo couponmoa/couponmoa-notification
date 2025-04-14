@@ -11,5 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MessageQueueDto {
     private String couponName;
+    private String subject;
+    private String text;
     private List<String> emailList;
 }
