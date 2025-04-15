@@ -12,20 +12,20 @@
 </div>
 
 <script>
-    const userId = 1; // 테스트할 유저 ID
+    const userId = 1265; // 테스트할 유저 ID
 
     // SseEmitter 방식
-    const eventSource = new EventSource(`api/v1/users/${userId}/notifications/emitter`);
+    const eventSource = new EventSource(`http://localhost:8081/api/v1/users/${userId}/notifications/emitter`);
 
     // webflux 방식
-    // const eventSource = new EventSource(`api/v1/users/${userId}/notifications/webflux`);
+    // const eventSource = new EventSource(`http://localhost:8081/api/v1/users/${userId}/notifications/emitter`);
 
-    eventSource.onmessage = function(event) {
+    eventSource.addEventListener("coupon-alert", function(event) {
         const alertsUl = document.getElementById("alerts");
         const newAlert = document.createElement("li");
         newAlert.innerText = event.data;
         alertsUl.appendChild(newAlert);
-    };
+    });
 
     eventSource.onerror = function(error) {
         console.error("SSE 오류 발생", error);

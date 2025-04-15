@@ -22,7 +22,7 @@ public class EmailSenderService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setBcc(dto.getEmailList().toArray(new String[0]));
         message.setSubject(dto.getSubject());
-        message.setText(dto.getCouponName() + dto.getText());
+        message.setText(dto.getName() + dto.getText());
 
         mailSender.send(message);
         log.info("메일 전송 완료");

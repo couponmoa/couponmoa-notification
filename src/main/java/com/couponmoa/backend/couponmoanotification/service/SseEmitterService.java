@@ -1,6 +1,9 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -10,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SseEmitterService {
 
@@ -20,6 +24,7 @@ public class SseEmitterService {
     public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(30 * 60 * 1000L); // 30분 타임아웃
         this.emitters.put(userId, emitter);
+        log.info("SSE 연결 시작: userId={}", userId);
         emitter.onCompletion(() -> emitters.remove(userId));
         emitter.onTimeout(() -> emitters.remove(userId));
         return emitter;
@@ -28,12 +33,13 @@ public class SseEmitterService {
     // TODO: api 서버명 정해지면 그거에 맞게 url 수정 필요
     // userId에 저장된 emitter 찾아서 알림 전송
     public void send(Long userId, String message, Long notificationId) {
-        SseEmitter emitter = emitters.get(userId);
+        SseEmitter emitter = emitters.get(1265L); // 테스트용으로 임의 작성
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event().name("coupon-alert").data(message));
                 webClient.post() // notification 상태 변경
-                        .uri("http://couponmoa-api/notifications/{id}/notified", notificationId)
+                        .uri("http://localhost:8080/api/v1/notifications/{id}/notified", notificationId)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .retrieve()
                         .bodyToMono(Void.class)
                         .subscribe();
