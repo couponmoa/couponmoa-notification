@@ -1,6 +1,8 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,7 +33,8 @@ public class WebfluxService {
             // sse 전송
             sink.tryEmitNext(ServerSentEvent.builder(message).build());
             webClient.post() // notification 상태 변경
-                    .uri("http://couponmoa-api/notifications/{id}/notified",notificationId)
+                    .uri("http://localhost:8080/api/v1/notifications/{id}/notified", notificationId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .bodyToMono(Void.class)
                     .subscribe();
