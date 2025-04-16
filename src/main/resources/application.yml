@@ -3,5 +3,3 @@ spring:
     group:
       local: local
       prod: prod
-server:
-  port: 8081
