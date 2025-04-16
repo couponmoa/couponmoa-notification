@@ -33,10 +33,11 @@ public class SseEmitterService {
     // TODO: api 서버명 정해지면 그거에 맞게 url 수정 필요
     // userId에 저장된 emitter 찾아서 알림 전송
     public void send(Long userId, String message, Long notificationId) {
-        SseEmitter emitter = emitters.get(1265L); // 테스트용으로 임의 작성
+        SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
-                emitter.send(SseEmitter.event().name("coupon-alert").data(message));
+                emitter.send(message);
+                log.info("emitter 실행완료");
                 webClient.post() // notification 상태 변경
                         .uri("http://localhost:8080/api/v1/notifications/{id}/notified", notificationId)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

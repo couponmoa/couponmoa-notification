@@ -1,6 +1,7 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WebfluxService {
 
     private final Map<Long, Sinks.Many<ServerSentEvent<String>>> sinkMap = new ConcurrentHashMap<>();
@@ -23,6 +25,7 @@ public class WebfluxService {
     public Flux<ServerSentEvent<String>> subscribe(Long userId) {
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().multicast().onBackpressureBuffer();
         sinkMap.put(userId, sink);
+        log.info("SSE 연결 시작: userId={}", userId);
         return sink.asFlux().doFinally(signalType -> sinkMap.remove(userId));
     }
 
@@ -32,12 +35,15 @@ public class WebfluxService {
         if (sink != null) {
             // sse 전송
             sink.tryEmitNext(ServerSentEvent.builder(message).build());
+            log.info("webflux 실행완료");
             webClient.post() // notification 상태 변경
                     .uri("http://localhost:8080/api/v1/notifications/{id}/notified", notificationId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .bodyToMono(Void.class)
                     .subscribe();
+        } else{
+            log.warn("구독 안됨");
         }
     }
 }
