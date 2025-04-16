@@ -10,8 +10,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class MessageQueueDto {
-    private String couponName;
+    private List<String> emailList;
+    private String name;
     private String subject;
     private String text;
-    private List<String> emailList;
 }
