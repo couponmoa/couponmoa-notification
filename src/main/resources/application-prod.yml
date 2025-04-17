@@ -1,0 +1,24 @@
+spring:
+  #mail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: couponmoasender@gmail.com
+    password: aiivpuojhdzmxsti
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  #AWS SQS
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      credentials:
+        instance-profile: true
+      sqs:
+        queue:
+          emailAlert: couponmoa-queue

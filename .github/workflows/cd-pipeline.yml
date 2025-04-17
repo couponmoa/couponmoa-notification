@@ -47,6 +47,12 @@ jobs:
           mkdir -p build/libs
           cp $(find build/libs -name "*.jar" | head -n 1) build/libs/app.jar
 
+      # application-pord.yml 파일을 깃허브 시크릿에서 가져옴
+      - name: Create application-prod.yml file
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > src/main/resources/application-prod.yml
+
       # ECR에 이미지 배포
       - name: Build, tag, and push image to Amazon ECR
         env:
@@ -65,8 +71,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "AWS_REGION: ${{ secrets.EC2_SSH_KEY }}"
-            echo "AWS_ACCOUNT_ID: ${{ secrets.EC2_HOST }}"
+            echo "EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}"
+            echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
                 docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/couponmoa-notification:latest
