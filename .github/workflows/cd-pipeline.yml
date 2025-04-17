@@ -39,6 +39,12 @@ jobs:
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      #libs 디렉토리 생성
+      - name: create libs directory
+        run: |
+          mkdir -p build/libs
+          cp $(find build/libs -name "*.jar" | head -n 1) build/libs/app.jar
+
       # ECR에 이미지 배포
       - name: Build, tag, and push image to Amazon ECR
         env:
