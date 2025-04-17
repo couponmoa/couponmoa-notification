@@ -21,6 +21,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # application-pord.yml 파일을 깃허브 시크릿에서 가져옴(빌드 전)
+      - name: Create application-prod.yml file
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > src/main/resources/application-prod.yml
+
       # gradlew 권한 부여
       - name: Grant permission to gradlew
         run: chmod +x ./gradlew
@@ -65,8 +71,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "AWS_REGION: ${{ secrets.EC2_SSH_KEY }}"
-            echo "AWS_ACCOUNT_ID: ${{ secrets.EC2_HOST }}"
+            echo "EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}"
+            echo "EC2_HOST: ${{ secrets.EC2_HOST }}"
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
                 docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/couponmoa-notification:latest
