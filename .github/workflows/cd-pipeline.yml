@@ -21,6 +21,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build Spring Boot JAR
+        run: ./gradlew build -x test
+
       # AWS 자격 증명
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -38,12 +44,6 @@ jobs:
         run: |
           mkdir -p build/libs
           cp $(find build/libs -name "*.jar" | head -n 1) build/libs/app.jar
-
-      #스프링부트 빌드
-      - name: Build Spring Boot App (without test)
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build -x test
 
       # ECR에 이미지 배포
       - name: Build, tag, and push image to Amazon ECR
