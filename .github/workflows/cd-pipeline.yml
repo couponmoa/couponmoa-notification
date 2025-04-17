@@ -21,9 +21,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # gradlew 권한 부여
       - name: Grant permission to gradlew
         run: chmod +x ./gradlew
 
+      # gradlew 빌드
       - name: Build Spring Boot JAR
         run: ./gradlew build -x test
 
