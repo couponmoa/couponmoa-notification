@@ -55,12 +55,6 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      #인코딩된 SSH 복호화
-      - name: Decode EC2 SSH Key
-        run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > ec2-key.pem
-          chmod 600 ec2-key.pem
-
       # EC2에 배포
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
