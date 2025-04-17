@@ -57,7 +57,7 @@ jobs:
 
       # EC2에 배포
       - name: Deploy on EC2
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
