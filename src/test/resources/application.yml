@@ -1,0 +1,20 @@
+spring:
+  mail:
+    host: localhost
+    port: 2525
+    username: dummy
+    password: dummy
+
+  cloud:
+    aws:
+      credentials:
+        access-key: dummy
+        secret-key: dummy
+      region:
+        static: ap-northeast-2
+      stack:
+        auto: false
+      sqs:
+        enabled: false
+        queue:
+          emailAlert: dummy-url
