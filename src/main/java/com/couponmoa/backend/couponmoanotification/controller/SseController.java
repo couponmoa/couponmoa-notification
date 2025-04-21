@@ -32,20 +32,5 @@ public class SseController {
     public Flux<ServerSentEvent<String>> webfluxSubscribe(@PathVariable Long userId) {
         return webfluxService.subscribe(userId);
     }
-
-    // 성능 테스트용(SQS 없이 바로 알림 전송)
-    @PostMapping("/test-notify-emitter")
-    public ResponseEntity<Void> testNotifyEmitter(@RequestParam Long userId, @RequestParam String message) {
-        sseEmitterService.send(userId, message, null); // WebFlux 또는 SseEmitter 방식 호출
-        return ResponseEntity.ok().build();
-    }
-    // 성능 테스트용(SQS 없이 바로 알림 전송)
-    @PostMapping("/test-notify-webflux")
-    public ResponseEntity<Void> testNotifyWebflux(@RequestParam Long userId, @RequestParam String message) {
-        webfluxService.send(userId, message, null); // WebFlux 또는 SseEmitter 방식 호출
-        return ResponseEntity.ok().build();
-    }
-
-
 }
 
