@@ -69,6 +69,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional
     public void handleCouponExpireMessage(CouponExpireMessage message) {
         try {
             EmailDto emailDto = EmailDto.from(message);
@@ -79,6 +80,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional
     public void handleCouponUseMessage(CouponUserMessage message) {
         notificationRepository.deleteExpireNotificationByUserCouponId(message.getUserCouponId());
     }
