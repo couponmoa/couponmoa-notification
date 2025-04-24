@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CouponUserMessage {
+public class CouponUseMessage {
     private final Long userCouponId;
 }

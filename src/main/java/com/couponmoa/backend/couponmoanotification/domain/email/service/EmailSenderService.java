@@ -16,7 +16,7 @@ public class EmailSenderService {
 
     private final JavaMailSender mailSender;
 
-    public void sendEmail(EmailDto dto) {
+    public void send(EmailDto dto) {
         List<String> emailList = dto.getEmailList();
         if (emailList == null || emailList.isEmpty()) {
             throw new IllegalStateException("이메일을 전달받지 못했습니다.");

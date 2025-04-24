@@ -4,7 +4,7 @@ import com.couponmoa.backend.couponmoanotification.domain.notification.service.N
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponCreateMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponExpireMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponIssueMessage;
-import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUserMessage;
+import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUseMessage;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class NotificationMessageListener {
     }
 
     @SqsListener("coupon-use-queue")
-    public void receiveCouponUseMessage(CouponUserMessage message) {
+    public void receiveCouponUseMessage(CouponUseMessage message) {
         notificationService.handleCouponUseMessage(message);
     }
 }

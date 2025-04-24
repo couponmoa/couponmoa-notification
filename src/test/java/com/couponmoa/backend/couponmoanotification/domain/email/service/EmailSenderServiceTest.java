@@ -32,7 +32,7 @@ public class EmailSenderServiceTest {
         given(dto.getEmailList()).willReturn(null);
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> emailSenderService.sendEmail(dto)
+                () -> emailSenderService.send(dto)
         );
 
         assertEquals("이메일을 전달받지 못했습니다.", thrown.getMessage());
@@ -45,7 +45,7 @@ public class EmailSenderServiceTest {
         given(dto.getEmailList()).willReturn(Collections.emptyList());
 
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> emailSenderService.sendEmail(dto)
+                () -> emailSenderService.send(dto)
         );
 
         assertEquals("이메일을 전달받지 못했습니다.", thrown.getMessage());
@@ -56,7 +56,7 @@ public class EmailSenderServiceTest {
     void 메일_전송_성공() {
         EmailDto dto = new EmailDto(List.of("test@test.com"), "subject", "content");
 
-        emailSenderService.sendEmail(dto);
+        emailSenderService.send(dto);
 
         verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }

@@ -7,7 +7,7 @@ import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponExpireMe
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponIssueMessage;
 import com.couponmoa.backend.couponmoanotification.domain.notification.entity.Notification;
 import com.couponmoa.backend.couponmoanotification.domain.notification.repository.NotificationRepository;
-import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUserMessage;
+import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUseMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
@@ -28,7 +28,7 @@ public class NotificationService {
 
     public void handleCouponCreateMessage(CouponCreateMessage message) {
         EmailDto emailDto = EmailDto.from(message);
-        emailSenderService.sendEmail(emailDto);
+        emailSenderService.send(emailDto);
     }
 
     @Transactional
@@ -73,7 +73,7 @@ public class NotificationService {
     public void handleCouponExpireMessage(CouponExpireMessage message) {
         try {
             EmailDto emailDto = EmailDto.from(message);
-            emailSenderService.sendEmail(emailDto);
+            emailSenderService.send(emailDto);
             notificationRepository.markExpireNotificationAsSent(message.getUserCouponIdList());
         } catch (Exception e) {
             notificationRepository.markExpireNotificationAsFailed(message.getUserCouponIdList());
@@ -81,7 +81,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void handleCouponUseMessage(CouponUserMessage message) {
+    public void handleCouponUseMessage(CouponUseMessage message) {
         notificationRepository.deleteExpireNotificationByUserCouponId(message.getUserCouponId());
     }
 
