@@ -16,16 +16,16 @@ public class EmailSenderService {
 
     private final JavaMailSender mailSender;
 
-    public void sendEmail(EmailDto emailDto) {
-        List<String> emailList = emailDto.getEmailList();
+    public void sendEmail(EmailDto dto) {
+        List<String> emailList = dto.getEmailList();
         if (emailList == null || emailList.isEmpty()) {
             throw new IllegalStateException("이메일을 전달받지 못했습니다.");
         }
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setBcc(emailList.toArray(new String[0]));
-        message.setSubject(emailDto.getSubject());
-        message.setText(emailDto.getContent());
+        message.setSubject(dto.getSubject());
+        message.setText(dto.getContent());
 
         mailSender.send(message);
     }

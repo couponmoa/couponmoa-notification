@@ -1,7 +1,6 @@
-package com.couponmoa.backend.couponmoanotification.service;
+package com.couponmoa.backend.couponmoanotification.domain.email.service;
 
-import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponCreateMessage;
-import com.couponmoa.backend.couponmoanotification.domain.email.service.EmailSenderService;
+import com.couponmoa.backend.couponmoanotification.domain.email.dto.EmailDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,9 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -27,25 +28,36 @@ public class EmailSenderServiceTest {
 
     @Test
     void 이메일_리스트_null() {
-        CouponCreateMessage dto = mock(CouponCreateMessage.class);
+        EmailDto dto = mock(EmailDto.class);
         given(dto.getEmailList()).willReturn(null);
-        emailSenderService.sendEmail(dto);
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> emailSenderService.sendEmail(dto)
+        );
+
+        assertEquals("이메일을 전달받지 못했습니다.", thrown.getMessage());
         verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
     }
 
     @Test
     void 이메일_리스트_isEmpty() {
-        CouponCreateMessage dto = mock(CouponCreateMessage.class);
+        EmailDto dto = mock(EmailDto.class);
         given(dto.getEmailList()).willReturn(Collections.emptyList());
-        emailSenderService.sendEmail(dto);
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> emailSenderService.sendEmail(dto)
+        );
+
+        assertEquals("이메일을 전달받지 못했습니다.", thrown.getMessage());
         verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
     }
 
     @Test
     void 메일_전송_성공() {
-        CouponCreateMessage dto = new CouponCreateMessage(
-                Arrays.asList("test@test.com", "test1@test.com"), "subject", "text", "name");
+        EmailDto dto = new EmailDto(List.of("test@test.com"), "subject", "content");
+
         emailSenderService.sendEmail(dto);
+
         verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 }
