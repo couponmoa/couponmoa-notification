@@ -84,6 +84,6 @@ public class NotificationService {
     }
 
     private boolean shouldCreateExpireNotification(LocalDateTime expiryDate) {
-        return expiryDate.isBefore(LocalDateTime.now().minusDays(1));
+        return expiryDate.isAfter(LocalDateTime.now().plusDays(1));
     }
 }
