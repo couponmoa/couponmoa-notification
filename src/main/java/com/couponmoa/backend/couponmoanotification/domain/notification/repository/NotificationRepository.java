@@ -18,4 +18,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("UPDATE Notification n SET n.status = 'FAILED' " +
             "WHERE n.userCouponId IN :userCouponIdList AND n.type = 'COUPON_EXPIRE'")
     void markExpireNotificationAsFailed(List<Long> userCouponIdList);
+
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.userCouponId = :userCouponId AND n.type = 'COUPON_EXPIRE'")
+    void deleteExpireNotificationByUserCouponId(Long userCouponId);
 }

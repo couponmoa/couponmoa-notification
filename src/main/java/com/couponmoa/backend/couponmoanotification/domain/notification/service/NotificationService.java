@@ -7,6 +7,7 @@ import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponExpireMe
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponIssueMessage;
 import com.couponmoa.backend.couponmoanotification.domain.notification.entity.Notification;
 import com.couponmoa.backend.couponmoanotification.domain.notification.repository.NotificationRepository;
+import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUserMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
@@ -76,6 +77,10 @@ public class NotificationService {
         } catch (Exception e) {
             notificationRepository.markExpireNotificationAsFailed(message.getUserCouponIdList());
         }
+    }
+
+    public void handleCouponUseMessage(CouponUserMessage message) {
+        notificationRepository.deleteExpireNotificationByUserCouponId(message.getUserCouponId());
     }
 
     private boolean shouldCreateExpireNotification(LocalDateTime expiryDate) {
