@@ -1,3 +1,9 @@
 spring:
+  application:
+    name: couponmoa-notification
+
   profiles:
     active: local
+
+  jpa:
+    open-in-view: false

@@ -1,6 +1,7 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
-import com.couponmoa.backend.couponmoanotification.dto.MessageQueueDto;
+import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponCreateMessage;
+import com.couponmoa.backend.couponmoanotification.domain.email.service.EmailSenderService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,7 @@ public class EmailSenderServiceTest {
 
     @Test
     void 이메일_리스트_null() {
-        MessageQueueDto dto = mock(MessageQueueDto.class);
+        CouponCreateMessage dto = mock(CouponCreateMessage.class);
         given(dto.getEmailList()).willReturn(null);
         emailSenderService.sendEmail(dto);
         verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
@@ -34,7 +35,7 @@ public class EmailSenderServiceTest {
 
     @Test
     void 이메일_리스트_isEmpty() {
-        MessageQueueDto dto = mock(MessageQueueDto.class);
+        CouponCreateMessage dto = mock(CouponCreateMessage.class);
         given(dto.getEmailList()).willReturn(Collections.emptyList());
         emailSenderService.sendEmail(dto);
         verify(javaMailSender, never()).send(any(SimpleMailMessage.class));
@@ -42,7 +43,7 @@ public class EmailSenderServiceTest {
 
     @Test
     void 메일_전송_성공() {
-        MessageQueueDto dto = new MessageQueueDto(
+        CouponCreateMessage dto = new CouponCreateMessage(
                 Arrays.asList("test@test.com", "test1@test.com"), "subject", "text", "name");
         emailSenderService.sendEmail(dto);
         verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));

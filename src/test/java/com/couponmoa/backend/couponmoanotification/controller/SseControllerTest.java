@@ -1,7 +1,8 @@
 package com.couponmoa.backend.couponmoanotification.controller;
 
-import com.couponmoa.backend.couponmoanotification.service.SseEmitterService;
-import com.couponmoa.backend.couponmoanotification.service.WebfluxService;
+import com.couponmoa.backend.couponmoanotification.domain.sse.controller.SseController;
+import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
+import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,7 +16,6 @@ import reactor.core.publisher.Flux;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +33,7 @@ public class SseControllerTest {
     private SseEmitterService sseEmitterService;
 
     @MockitoBean
-    private WebfluxService webfluxService;
+    private SseWebfluxService sseWebfluxService;
 
     @Test
     void emitter_subscribe() throws Exception {
@@ -52,7 +52,7 @@ public class SseControllerTest {
                 ServerSentEvent.builder("Message 1").build(),
                 ServerSentEvent.builder("Message 2").build()
         );
-        given(webfluxService.subscribe(anyLong())).willReturn(mockFlux);
+        given(sseWebfluxService.subscribe(anyLong())).willReturn(mockFlux);
 
         mockMvc.perform(get("/api/v1/users/{userId}/notifications/webflux",userId))
                 .andExpect(status().isOk());

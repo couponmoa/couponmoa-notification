@@ -1,5 +1,6 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
+import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

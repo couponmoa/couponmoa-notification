@@ -1,5 +1,6 @@
 package com.couponmoa.backend.couponmoanotification.service;
 
+import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class WebfluxServiceTest {
+public class SseWebfluxServiceTest {
 
     @Mock
     private WebClient webClient;
@@ -35,12 +36,12 @@ public class WebfluxServiceTest {
     private WebClient.ResponseSpec responseSpec;
 
     @InjectMocks
-    private WebfluxService webfluxService;
+    private SseWebfluxService sseWebfluxService;
 
     @Test
     void 구독_성공() {
         Long userId = 1L;
-        Flux<ServerSentEvent<String>> result = webfluxService.subscribe(userId);
+        Flux<ServerSentEvent<String>> result = sseWebfluxService.subscribe(userId);
         assertNotNull(result);
     }
 
@@ -50,11 +51,11 @@ public class WebfluxServiceTest {
         String message = "message";
         Long notificationId = 1L;
 
-        Field sinkField = WebfluxService.class.getDeclaredField("sinkMap");
+        Field sinkField = SseWebfluxService.class.getDeclaredField("sinkMap");
         sinkField.setAccessible(true);
         Map<Long, Sinks.Many<ServerSentEvent<String>>> sinkMap = new ConcurrentHashMap<>();
 
-        webfluxService.send(userId, message, notificationId);
+        sseWebfluxService.send(userId, message, notificationId);
 
         verify(webClient, never()).post();
     }
@@ -67,7 +68,7 @@ public class WebfluxServiceTest {
 
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-        Field sinkField = WebfluxService.class.getDeclaredField("sinkMap");
+        Field sinkField = SseWebfluxService.class.getDeclaredField("sinkMap");
         sinkField.setAccessible(true);
         Map<Long, Sinks.Many<ServerSentEvent<String>>> sinkMap = new ConcurrentHashMap<>();
         sinkMap.put(userId, sink);
@@ -78,9 +79,9 @@ public class WebfluxServiceTest {
         given(uriSpec.retrieve()).willReturn(responseSpec);
         given(responseSpec.bodyToMono(Void.class)).willReturn(Mono.empty());
 
-        sinkField.set(webfluxService, sinkMap);
+        sinkField.set(sseWebfluxService, sinkMap);
 
-        webfluxService.send(userId, message, notificationId);
+        sseWebfluxService.send(userId, message, notificationId);
 
         verify(webClient).post();
     }
