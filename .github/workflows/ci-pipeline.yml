@@ -30,7 +30,7 @@ jobs:
           ./gradlew clean test
 
       # gradlew 테스트 없이 빌드
-      - name: Build Spring Boot App (without test)
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build -x test
+#      - name: Build Spring Boot App (without test)
+#        run: |
+#          chmod +x ./gradlew
+#          ./gradlew build -x test
