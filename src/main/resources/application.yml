@@ -1,12 +1,9 @@
 spring:
   application:
-    name: notification-server
+    name: couponmoa-notification
 
   profiles:
-    active: ${SPRING_PROFILE:local}
+    active: local
 
   jpa:
     open-in-view: false
-
-server:
-  port: 8084
