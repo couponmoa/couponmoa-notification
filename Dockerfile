@@ -1,8 +1,6 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:17-jdk-alpine
 
-WORKDIR /app
-
-COPY build/libs/app.jar app.jar
+COPY build/libs/*.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=prod
 
