@@ -20,16 +20,3 @@ spring:
     aws:
       region:
         static: ${AWS_REGION}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-        orm:
-          jdbc:
-            bind: TRACE
