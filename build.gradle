@@ -38,10 +38,6 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
-
-	// webflux
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.projectreactor:reactor-core'
 }
 
 tasks.named('test') {

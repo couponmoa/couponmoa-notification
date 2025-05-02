@@ -12,12 +12,8 @@ spring:
         secret-key: dummy
       region:
         static: ap-northeast-2
-      stack:
-        auto: false
       sqs:
         enabled: false
-        queue:
-          emailAlert: dummy-url
 
   datasource:
     url: jdbc:h2:mem:testdb

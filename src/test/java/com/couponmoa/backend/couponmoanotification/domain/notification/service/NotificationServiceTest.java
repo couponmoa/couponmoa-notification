@@ -11,7 +11,6 @@ import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponIssueMes
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUseMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
-import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,8 +36,6 @@ class NotificationServiceTest {
     private NotificationRepository notificationRepository;
     @Mock
     private SseEmitterService sseEmitterService;
-    @Mock
-    private SseWebfluxService sseWebfluxService;
     @Mock
     private EmailSenderService emailSenderService;
     @InjectMocks
@@ -70,7 +67,7 @@ class NotificationServiceTest {
 
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class HandleCouponIssueMessageV1Tests {
+    class HandleCouponIssueMessageTests {
 
         private static final CouponIssueMessage message = new CouponIssueMessage(1L, 1L, "couponName", LocalDateTime.now().plusMonths(1));
 
@@ -79,7 +76,7 @@ class NotificationServiceTest {
         void 쿠폰_발급_알림_쿠폰_발급_알림만_저장_성공() {
             CouponIssueMessage message = new CouponIssueMessage(1L, 1L, "couponName", LocalDateTime.now());
 
-            notificationService.handleCouponIssueMessageV1(message);
+            notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, times(1)).save(any(Notification.class));
         }
@@ -87,7 +84,7 @@ class NotificationServiceTest {
         @Test
         @Order(2)
         void 쿠폰_발급_알림_쿠폰_만료_알림도_저장_성공() {
-            notificationService.handleCouponIssueMessageV1(message);
+            notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, times(2)).save(any(Notification.class));
         }
@@ -97,7 +94,7 @@ class NotificationServiceTest {
         void 쿠폰_발급_알림_sse_전송_실패() {
             doThrow(new RuntimeException()).when(sseEmitterService).send(any(SseDto.class));
 
-            notificationService.handleCouponIssueMessageV1(message);
+            notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, atLeastOnce()).save(notificationCaptor.capture());
             Notification issueNotification = notificationCaptor.getAllValues().get(0);
@@ -107,58 +104,11 @@ class NotificationServiceTest {
         @Test
         @Order(4)
         void 쿠폰_발급_알림_sse_전송_성공() {
-            notificationService.handleCouponIssueMessageV1(message);
+            notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, atLeastOnce()).save(notificationCaptor.capture());
             Notification issueNotification = notificationCaptor.getAllValues().get(0);
             assertEquals(NotificationStatus.SENT, issueNotification.getStatus());
-        }
-    }
-
-    @Nested
-    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class HandleCouponIssueMessageV2Tests {
-
-        private static final CouponIssueMessage message = new CouponIssueMessage(1L, 1L, "couponName", LocalDateTime.now().plusMonths(1));
-
-        @Test
-        @Order(1)
-        void 쿠폰_발급_알림_쿠폰_발급_알림만_저장_성공() {
-            CouponIssueMessage message = new CouponIssueMessage(1L, 1L, "couponName", LocalDateTime.now());
-
-            notificationService.handleCouponIssueMessageV2(message);
-
-            verify(notificationRepository, times(1)).save(any(Notification.class));
-        }
-
-        @Test
-        @Order(2)
-        void 쿠폰_발급_알림_쿠폰_만료_알림도_저장_성공() {
-            notificationService.handleCouponIssueMessageV2(message);
-
-            verify(notificationRepository, times(2)).save(any(Notification.class));
-        }
-
-        @Test
-        @Order(3)
-        void 쿠폰_발급_알림_sse_전송_실패() {
-            doThrow(new IllegalStateException()).when(sseWebfluxService).send(any(SseDto.class));
-
-            notificationService.handleCouponIssueMessageV2(message);
-
-            verify(notificationRepository, atLeastOnce()).save(notificationCaptor.capture());
-            Notification issueNotification = notificationCaptor.getAllValues().get(0);
-            assertEquals(NotificationStatus.FAILED, issueNotification.getStatus());
-        }
-
-        @Test
-        @Order(4)
-        void 쿠폰_발급_알림_sse_전송_성공() {
-            notificationService.handleCouponIssueMessageV2(message);
-
-            verify(notificationRepository, atLeastOnce()).save(notificationCaptor.capture());
-            Notification issueNotification = notificationCaptor.getAllValues().get(0);
-            assertEquals(NotificationStatus.UNCONFIRMED, issueNotification.getStatus());
         }
     }
 
