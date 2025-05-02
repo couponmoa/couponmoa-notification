@@ -12,15 +12,16 @@ spring:
         secret-key: dummy
       region:
         static: ap-northeast-2
-      stack:
-        auto: false
       sqs:
         enabled: false
-        queue:
-          emailAlert: dummy-url
 
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+management:
+  health:
+    mail:
+      enabled: false

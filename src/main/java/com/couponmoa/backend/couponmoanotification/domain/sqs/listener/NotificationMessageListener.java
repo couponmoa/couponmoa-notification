@@ -31,22 +31,12 @@ public class NotificationMessageListener {
     }
 
     @SqsListener("coupon-issue-v1-queue")
-    public void receiveCouponIssueMessageV1(@Payload String rawMessage) {
+    public void receiveCouponIssueMessage(@Payload String rawMessage) {
         try {
             CouponIssueMessage message = objectMapper.readValue(rawMessage, CouponIssueMessage.class);
-            notificationService.handleCouponIssueMessageV1(message);
+            notificationService.handleCouponIssueMessage(message);
         } catch (Exception e) {
             log.error("coupon-issue-v1-queue: {}", e.getMessage(), e);
-        }
-    }
-
-    @SqsListener("coupon-issue-v2-queue")
-    public void receiveCouponIssueMessageV2(@Payload String rawMessage) {
-        try {
-            CouponIssueMessage message = objectMapper.readValue(rawMessage, CouponIssueMessage.class);
-            notificationService.handleCouponIssueMessageV2(message);
-        } catch (Exception e) {
-            log.error("coupon-issue-v2-queue: {}", e.getMessage(), e);
         }
     }
 
