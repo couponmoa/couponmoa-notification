@@ -2,18 +2,20 @@ package com.couponmoa.backend.couponmoanotification.domain.notification.service;
 
 import com.couponmoa.backend.couponmoanotification.domain.email.dto.EmailDto;
 import com.couponmoa.backend.couponmoanotification.domain.email.service.EmailSenderService;
+import com.couponmoa.backend.couponmoanotification.domain.notification.entity.Notification;
+import com.couponmoa.backend.couponmoanotification.domain.notification.repository.NotificationRepository;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponCreateMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponExpireMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponIssueMessage;
-import com.couponmoa.backend.couponmoanotification.domain.notification.entity.Notification;
-import com.couponmoa.backend.couponmoanotification.domain.notification.repository.NotificationRepository;
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUseMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
@@ -23,14 +25,15 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterService sseEmitterService;
     private final EmailSenderService emailSenderService;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public void handleCouponCreateMessage(CouponCreateMessage message) {
-        EmailDto emailDto = EmailDto.from(message);
-        emailSenderService.send(emailDto);
-    }
+    private static final Duration TTL = Duration.ofHours(6);
 
     @Transactional
     public void handleCouponIssueMessage(CouponIssueMessage message) {
+        String key = "coupon-issue:" + message.getCouponName() + ":" + message.getUserCouponId();
+        if (!acquireNotificationLock(key)) return;
+
         Notification issueNotification = Notification.forIssue(message.getUserCouponId());
         notificationRepository.save(issueNotification);
 
@@ -50,6 +53,10 @@ public class NotificationService {
 
     @Transactional
     public void handleCouponExpireMessage(CouponExpireMessage message) {
+        // 멱등성 보장
+        String key = "expire-coupon:" + message.getCouponName() + ":" + message.getExpiryDate().toLocalDate();
+        if (!acquireNotificationLock(key)) return;
+
         try {
             EmailDto emailDto = EmailDto.from(message);
             emailSenderService.send(emailDto);
@@ -59,6 +66,11 @@ public class NotificationService {
         }
     }
 
+    public void handleCouponCreateMessage(CouponCreateMessage message) {
+        EmailDto emailDto = EmailDto.from(message);
+        emailSenderService.send(emailDto);
+    }
+
     @Transactional
     public void handleCouponUseMessage(CouponUseMessage message) {
         notificationRepository.deleteExpireNotificationByUserCouponId(message.getUserCouponId());
@@ -66,5 +78,10 @@ public class NotificationService {
 
     private boolean shouldCreateExpireNotification(LocalDateTime expiryDate) {
         return expiryDate.isAfter(LocalDateTime.now().plusDays(1));
+    }
+
+    private boolean acquireNotificationLock(String key) {
+        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "sent", TTL);
+        return Boolean.TRUE.equals(result);
     }
 }
