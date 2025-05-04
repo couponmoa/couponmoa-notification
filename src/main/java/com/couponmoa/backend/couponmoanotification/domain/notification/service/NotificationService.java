@@ -10,6 +10,7 @@ import com.couponmoa.backend.couponmoanotification.domain.notification.repositor
 import com.couponmoa.backend.couponmoanotification.domain.sqs.dto.CouponUseMessage;
 import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
+import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseWebfluxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final SseEmitterService sseEmitterService;
+    private final SseWebfluxService sseWebfluxService;
     private final EmailSenderService emailSenderService;
 
     public void handleCouponCreateMessage(CouponCreateMessage message) {
@@ -30,7 +32,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void handleCouponIssueMessage(CouponIssueMessage message) {
+    public void handleCouponIssueMessageV1(CouponIssueMessage message) {
         Notification issueNotification = Notification.forIssue(message.getUserCouponId());
         notificationRepository.save(issueNotification);
 
@@ -43,6 +45,25 @@ public class NotificationService {
             SseDto sseDto = SseDto.from(message, issueNotification);
             sseEmitterService.send(sseDto);
             issueNotification.markAsSent();
+        } catch (Exception e) {
+            issueNotification.markAsFailed();
+        }
+    }
+
+    @Transactional
+    public void handleCouponIssueMessageV2(CouponIssueMessage message) {
+        Notification issueNotification = Notification.forIssue(message.getUserCouponId());
+        notificationRepository.save(issueNotification);
+
+        if (shouldCreateExpireNotification(message.getExpiryDate())) { // 쿠폰 만료일이 하루 이상 남은 경우 만료 알림 저장
+            Notification expireNotification = Notification.forExpire(message.getUserCouponId());
+            notificationRepository.save(expireNotification);
+        }
+
+        try {
+            SseDto sseDto = SseDto.from(message, issueNotification);
+            sseWebfluxService.send(sseDto);
+            issueNotification.markAsUnconfirmed();
         } catch (Exception e) {
             issueNotification.markAsFailed();
         }
