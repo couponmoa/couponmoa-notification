@@ -5,6 +5,11 @@ spring:
     username: dummy
     password: dummy
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   cloud:
     aws:
       credentials:
