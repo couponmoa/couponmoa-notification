@@ -18,6 +18,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -44,6 +45,8 @@ class NotificationServiceTest {
     private StringRedisTemplate redisTemplate;
     @Mock
     private ValueOperations<String, String> valueOperations;
+    @Mock
+    private RedisTemplate<String, SseDto> redisTemplateSse;
     @InjectMocks
     private NotificationService notificationService;
 
@@ -103,7 +106,7 @@ class NotificationServiceTest {
         void 쿠폰_발급_알림_sse_전송_실패() {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
-            doThrow(new RuntimeException()).when(sseEmitterService).send(any(SseDto.class));
+            doThrow(new RuntimeException()).when(redisTemplateSse).convertAndSend(anyString(), any(SseDto.class));
 
             notificationService.handleCouponIssueMessage(message);
 
