@@ -58,9 +58,7 @@ public class SseEmitterServiceTest {
 
         emittersField.set(sseEmitterService, emitters);
 
-        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> sseEmitterService.send(sseDto));
-
-        assertEquals("사용자 SSE 연결이 존재하지 않습니다: userId=" + sseDto.getUserId(), thrown.getMessage());
+        assertDoesNotThrow(() -> sseEmitterService.send(sseDto));
     }
 
     @Test
