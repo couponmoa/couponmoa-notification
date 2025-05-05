@@ -104,7 +104,7 @@ class NotificationServiceTest {
         @Disabled("Redis 연결 이슈로 임시 비활성화")
         @Test
         @Order(3)
-        void 쿠폰_발급_알림_sse_전송_실패() {
+        void 쿠폰_발급_알림_sse_전송_실패_비활() {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             doThrow(new RuntimeException()).when(redisTemplateSse).convertAndSend(anyString(), any(SseDto.class));
