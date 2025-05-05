@@ -23,9 +23,9 @@ import java.time.LocalDateTime;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final SseEmitterService sseEmitterService;
     private final EmailSenderService emailSenderService;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate; // 멱등성용
+    private final RedisTemplate<String, SseDto> redisTemplateSse; // pub/sub용
 
     private static final Duration TTL = Duration.ofHours(6);
 
@@ -44,7 +44,7 @@ public class NotificationService {
 
         try {
             SseDto sseDto = SseDto.from(message, issueNotification);
-            sseEmitterService.send(sseDto);
+            redisTemplateSse.convertAndSend("sse-channel", sseDto); // redis pub (모든 인스턴스에 발행)
             issueNotification.markAsSent();
         } catch (Exception e) {
             issueNotification.markAsFailed();
