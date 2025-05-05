@@ -18,6 +18,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +40,10 @@ class NotificationServiceTest {
     private SseEmitterService sseEmitterService;
     @Mock
     private EmailSenderService emailSenderService;
+    @Mock
+    private StringRedisTemplate redisTemplate;
+    @Mock
+    private ValueOperations<String, String> valueOperations;
     @InjectMocks
     private NotificationService notificationService;
 
@@ -75,7 +81,8 @@ class NotificationServiceTest {
         @Order(1)
         void 쿠폰_발급_알림_쿠폰_발급_알림만_저장_성공() {
             CouponIssueMessage message = new CouponIssueMessage(1L, 1L, "couponName", LocalDateTime.now());
-
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, times(1)).save(any(Notification.class));
@@ -84,6 +91,8 @@ class NotificationServiceTest {
         @Test
         @Order(2)
         void 쿠폰_발급_알림_쿠폰_만료_알림도_저장_성공() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, times(2)).save(any(Notification.class));
@@ -92,6 +101,8 @@ class NotificationServiceTest {
         @Test
         @Order(3)
         void 쿠폰_발급_알림_sse_전송_실패() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             doThrow(new RuntimeException()).when(sseEmitterService).send(any(SseDto.class));
 
             notificationService.handleCouponIssueMessage(message);
@@ -104,11 +115,25 @@ class NotificationServiceTest {
         @Test
         @Order(4)
         void 쿠폰_발급_알림_sse_전송_성공() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             notificationService.handleCouponIssueMessage(message);
 
             verify(notificationRepository, atLeastOnce()).save(notificationCaptor.capture());
             Notification issueNotification = notificationCaptor.getAllValues().get(0);
             assertEquals(NotificationStatus.SENT, issueNotification.getStatus());
+        }
+
+        @Test
+        @Order(5)
+        void 쿠폰_발급_알림_멱등성_체크_락_획득_실패_시_알림_실패() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(false);
+
+            notificationService.handleCouponIssueMessage(message);
+
+            verify(notificationRepository, never()).save(any());
+            verify(sseEmitterService, never()).send(any());
         }
     }
 
@@ -121,6 +146,8 @@ class NotificationServiceTest {
         @Test
         @Order(1)
         void 쿠폰_만료_알림_이메일_전송_실패() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             doThrow(new IllegalStateException()).when(emailSenderService).send(any(EmailDto.class));
 
             notificationService.handleCouponExpireMessage(message);
@@ -132,10 +159,23 @@ class NotificationServiceTest {
         @Test
         @Order(2)
         void 쿠폰_만료_알림_이메일_전송_성공() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
             notificationService.handleCouponExpireMessage(message);
 
             verify(notificationRepository, never()).markExpireNotificationAsFailed(anyList());
             verify(notificationRepository, times(1)).markExpireNotificationAsSent(anyList());
+        }
+
+        @Test
+        @Order(3)
+        void 쿠폰_만료_알림_멱등성_체크_락_획득_실패_시_알림_실패() {
+            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+            when(valueOperations.setIfAbsent(anyString(), anyString(), any())).thenReturn(false);
+
+            notificationService.handleCouponExpireMessage(message);
+
+            verify(notificationRepository, never()).markExpireNotificationAsFailed(anyList());
         }
     }
 

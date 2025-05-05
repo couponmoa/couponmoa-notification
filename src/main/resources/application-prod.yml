@@ -20,3 +20,8 @@ spring:
     aws:
       region:
         static: ${AWS_REGION}
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
