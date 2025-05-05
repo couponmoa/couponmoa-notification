@@ -41,7 +41,8 @@ public class SseEmitterService {
         SseEmitter emitter = emitters.get(dto.getUserId());
 
         if (emitter == null) {
-            throw new IllegalStateException("사용자 SSE 연결이 존재하지 않습니다: userId=" + dto.getUserId());
+            log.info("사용자 SSE 연결이 존재하지 않습니다: userId={}", dto.getUserId());
+            return; // 다른 인스턴스에 sseemitter가 있을 수 있음
         }
 
         try {

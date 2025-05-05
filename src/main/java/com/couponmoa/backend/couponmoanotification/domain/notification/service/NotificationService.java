@@ -12,6 +12,7 @@ import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,9 @@ import java.time.LocalDateTime;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final SseEmitterService sseEmitterService;
     private final EmailSenderService emailSenderService;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final StringRedisTemplate redisTemplate; // 멱등성용
+    private final RedisTemplate<String, SseDto> redisTemplateSse; // pub/sub용
 
     private static final Duration TTL = Duration.ofHours(6);
 
@@ -44,7 +45,7 @@ public class NotificationService {
 
         try {
             SseDto sseDto = SseDto.from(message, issueNotification);
-            sseEmitterService.send(sseDto);
+            redisTemplateSse.convertAndSend("sse-channel", sseDto); // redis pub (모든 인스턴스에 발행)
             issueNotification.markAsSent();
         } catch (Exception e) {
             issueNotification.markAsFailed();
