@@ -12,11 +12,13 @@ import com.couponmoa.backend.couponmoanotification.domain.sse.dto.SseDto;
 import com.couponmoa.backend.couponmoanotification.domain.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +83,24 @@ public class NotificationService {
     }
 
     private boolean acquireNotificationLock(String key) {
-        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, "sent", TTL);
-        return Boolean.TRUE.equals(result);
+        String script =
+                "if redis.call('SETNX', KEYS[1], ARGV[1]) == 1 then " +
+                        "   redis.call('EXPIRE', KEYS[1], tonumber(ARGV[2])) " +
+                        "   return 1 " +
+                        "else " +
+                        "   return 0 " +
+                        "end";
+
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText(script);
+        redisScript.setResultType(Long.class);
+
+        Long result = redisTemplate.execute(
+                redisScript,
+                Collections.singletonList(key),
+                "sent", String.valueOf(TTL.getSeconds())
+        );
+
+        return result != null && result == 1;
     }
 }
